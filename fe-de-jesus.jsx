@@ -1,0 +1,946 @@
+import { useState, useEffect, useCallback, useRef } from "react";
+
+/* ═══════════════════════════════════════════════════════════
+   CURSO BÍBLICO "LA FE DE JESÚS" — 20 LECCIONES
+   Iglesia Adventista del Séptimo Día
+   ═══════════════════════════════════════════════════════════ */
+
+// ─── 20 TEMAS OFICIALES ───
+const LECCIONES = [
+  {
+    id: 1, titulo: "Lo que la Biblia enseña acerca de Dios", icono: "✦",
+    intro: "Dios es el Ser supremo, eterno y todopoderoso. Él se ha revelado a través de su Palabra para que podamos conocerle y amarle.",
+    preguntas: [
+      { pregunta: "¿Cuántos dioses verdaderos existen?", cita: "Deuteronomio 6:4", texto: "Oye, Israel: Jehová nuestro Dios, Jehová uno es.", explicacion: "Solo existe un Dios verdadero. Aunque se manifiesta como Padre, Hijo y Espíritu Santo, es un solo Dios que nos ama infinitamente." },
+      { pregunta: "¿Cuáles son algunas cualidades de Dios?", cita: "Salmos 90:2", texto: "Desde el siglo y hasta el siglo, tú eres Dios.", explicacion: "Dios es eterno, no tiene principio ni fin. Es omnipotente, omnisciente y omnipresente, y desea tener una relación personal con cada uno de nosotros." },
+      { pregunta: "¿Cómo es el carácter de Dios?", cita: "1 Juan 4:8", texto: "El que no ama, no ha conocido a Dios; porque Dios es amor.", explicacion: "La esencia misma de Dios es el amor. Todo lo que Él hace está motivado por su amor incondicional hacia la humanidad." }
+    ]
+  },
+  {
+    id: 2, titulo: "La Santa Biblia", icono: "📖",
+    intro: "La Biblia es la Palabra inspirada de Dios, nuestra guía segura para la vida y la fe cristiana.",
+    preguntas: [
+      { pregunta: "¿Quién inspiró la Biblia?", cita: "2 Timoteo 3:16", texto: "Toda la Escritura es inspirada por Dios, y útil para enseñar, para redargüir, para corregir, para instruir en justicia.", explicacion: "Dios usó al Espíritu Santo para guiar a los escritores bíblicos. Aunque cada uno escribió con su propio estilo, el mensaje proviene de Dios." },
+      { pregunta: "¿Para qué nos fue dada la Biblia?", cita: "Salmos 119:105", texto: "Lámpara es a mis pies tu palabra, y lumbrera a mi camino.", explicacion: "La Biblia ilumina nuestro camino, nos muestra la voluntad de Dios y nos guía en cada decisión." },
+      { pregunta: "¿Cómo debemos estudiar la Biblia?", cita: "Hechos 17:11", texto: "Y éstos eran más nobles que los que estaban en Tesalónica, pues recibieron la palabra con toda solicitud, escudriñando cada día las Escrituras para ver si estas cosas eran así.", explicacion: "Debemos estudiar la Biblia diariamente, con mente abierta y corazón dispuesto." }
+    ]
+  },
+  {
+    id: 3, titulo: "La Oración y la Fe", icono: "🙏",
+    intro: "La oración es la comunicación directa con Dios. A través de ella fortalecemos nuestra fe y recibimos dirección divina.",
+    preguntas: [
+      { pregunta: "¿Qué es la oración?", cita: "Jeremías 33:3", texto: "Clama a mí, y yo te responderé, y te enseñaré cosas grandes y ocultas que tú no conoces.", explicacion: "La oración es hablar con Dios como con un amigo. Él promete escucharnos y respondernos." },
+      { pregunta: "¿En nombre de quién debemos orar?", cita: "Juan 14:13-14", texto: "Y todo lo que pidiereis al Padre en mi nombre, lo haré, para que el Padre sea glorificado en el Hijo.", explicacion: "Jesús es nuestro mediador ante el Padre. Oramos en su nombre porque Él nos abrió el camino." },
+      { pregunta: "¿Qué es la fe?", cita: "Hebreos 11:1", texto: "Es, pues, la fe la certeza de lo que se espera, la convicción de lo que no se ve.", explicacion: "La fe es confiar plenamente en Dios, creer en sus promesas aunque no veamos el resultado inmediato." }
+    ]
+  },
+  {
+    id: 4, titulo: "La Segunda Venida de Jesús", icono: "☁️",
+    intro: "La promesa más gloriosa de la Biblia: Jesús volverá para llevar a los suyos al hogar celestial.",
+    preguntas: [
+      { pregunta: "¿Prometió Jesús volver?", cita: "Juan 14:1-3", texto: "En la casa de mi Padre muchas moradas hay... voy, pues, a preparar lugar para vosotros. Y si me fuere y os preparare lugar, vendré otra vez, y os tomaré a mí mismo.", explicacion: "Jesús mismo prometió que regresaría. Esta es la esperanza más grande del cristiano." },
+      { pregunta: "¿Cómo será su venida?", cita: "Apocalipsis 1:7", texto: "He aquí que viene con las nubes, y todo ojo le verá.", explicacion: "La segunda venida será visible, audible y gloriosa. No será un evento secreto, todo el mundo lo verá." },
+      { pregunta: "¿Qué sucederá cuando Jesús venga?", cita: "1 Tesalonicenses 4:16-17", texto: "Porque el Señor mismo con voz de mando... descenderá del cielo; y los muertos en Cristo resucitarán primero.", explicacion: "Los justos muertos resucitarán y junto con los vivos serán llevados al cielo para estar con Cristo para siempre." }
+    ]
+  },
+  {
+    id: 5, titulo: "Las Señales de la Segunda Venida", icono: "🌟",
+    intro: "La Biblia describe señales claras que anuncian la proximidad del regreso de Jesús a esta tierra.",
+    preguntas: [
+      { pregunta: "¿Qué señales preceden la venida de Cristo?", cita: "Mateo 24:6-7", texto: "Y oiréis de guerras y rumores de guerras... Porque se levantará nación contra nación, y reino contra reino; y habrá pestes, y hambres, y terremotos en diferentes lugares.", explicacion: "Las guerras, desastres naturales, epidemias y la maldad creciente son señales del pronto regreso de Jesús." },
+      { pregunta: "¿Qué señales habrá en el cielo?", cita: "Mateo 24:29", texto: "E inmediatamente después de la tribulación de aquellos días, el sol se oscurecerá, y la luna no dará su resplandor, y las estrellas caerán del cielo.", explicacion: "Señales cósmicas acompañarán los últimos tiempos, confirmando que la venida de Cristo está cerca." },
+      { pregunta: "¿Debemos tener miedo?", cita: "Lucas 21:28", texto: "Cuando estas cosas comiencen a suceder, erguíos y levantad vuestra cabeza, porque vuestra redención está cerca.", explicacion: "Para el creyente, las señales no deben causar temor sino esperanza, pues anuncian nuestra redención." }
+    ]
+  },
+  {
+    id: 6, titulo: "El Origen del Pecado", icono: "🍂",
+    intro: "El pecado no fue creado por Dios. Tuvo su origen en la rebelión de Lucifer en el cielo.",
+    preguntas: [
+      { pregunta: "¿Dónde se originó el pecado?", cita: "Ezequiel 28:15", texto: "Perfecto eras en todos tus caminos desde el día que fuiste creado, hasta que se halló en ti maldad.", explicacion: "Lucifer fue creado perfecto, pero eligió rebelarse contra Dios. El pecado nació de su orgullo y ambición." },
+      { pregunta: "¿Cómo entró el pecado en este mundo?", cita: "Génesis 3:6", texto: "Y vio la mujer que el árbol era bueno para comer... y tomó de su fruto, y comió; y dio también a su marido, el cual comió así como ella.", explicacion: "Adán y Eva desobedecieron a Dios al comer del fruto prohibido, trayendo el pecado y la muerte a la humanidad." },
+      { pregunta: "¿Cuál es la consecuencia del pecado?", cita: "Romanos 6:23", texto: "Porque la paga del pecado es muerte, mas la dádiva de Dios es vida eterna en Cristo Jesús Señor nuestro.", explicacion: "El pecado trae muerte, pero Dios ofrece vida eterna como regalo a través de Jesús." }
+    ]
+  },
+  {
+    id: 7, titulo: "La Salvación", icono: "✝️",
+    intro: "Dios preparó un plan maravilloso para rescatar a la humanidad del pecado y restaurar la relación con Él.",
+    preguntas: [
+      { pregunta: "¿Cómo demostró Dios su amor?", cita: "Juan 3:16", texto: "Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.", explicacion: "El amor de Dios es tan grande que entregó lo más valioso: a su propio Hijo, para que podamos ser salvos." },
+      { pregunta: "¿Cómo somos salvos?", cita: "Efesios 2:8-9", texto: "Porque por gracia sois salvos por medio de la fe; y esto no de vosotros, pues es don de Dios; no por obras, para que nadie se gloríe.", explicacion: "La salvación es un regalo de Dios que recibimos por fe. No podemos ganarla con nuestras obras." },
+      { pregunta: "¿Hay otro camino de salvación?", cita: "Hechos 4:12", texto: "Y en ningún otro hay salvación; porque no hay otro nombre bajo el cielo, dado a los hombres, en que podamos ser salvos.", explicacion: "Jesús es el único camino de salvación. No hay otro mediador ni otro plan." }
+    ]
+  },
+  {
+    id: 8, titulo: "El Perdón de los Pecados", icono: "💧",
+    intro: "Dios ofrece perdón completo a todo aquel que se arrepiente y confiesa sus pecados con sinceridad.",
+    preguntas: [
+      { pregunta: "¿Qué sucede cuando confesamos?", cita: "1 Juan 1:9", texto: "Si confesamos nuestros pecados, él es fiel y justo para perdonar nuestros pecados, y limpiarnos de toda maldad.", explicacion: "Dios siempre está dispuesto a perdonarnos cuando venimos con un corazón sincero y arrepentido." },
+      { pregunta: "¿Qué nos pide Dios?", cita: "Hechos 3:19", texto: "Así que, arrepentíos y convertíos, para que sean borrados vuestros pecados.", explicacion: "Dios nos invita a arrepentirnos genuinamente y cambiar de dirección, dejando el pecado." },
+      { pregunta: "¿Cuán completo es el perdón de Dios?", cita: "Isaías 43:25", texto: "Yo, yo soy el que borro tus rebeliones por amor de mí mismo, y no me acordaré de tus pecados.", explicacion: "Cuando Dios perdona, lo hace completamente. Él promete no recordar nuestros pecados perdonados." }
+    ]
+  },
+  {
+    id: 9, titulo: "El Juicio", icono: "⚖️",
+    intro: "Dios ha establecido un juicio justo donde se revelará la verdad y se hará justicia perfecta.",
+    preguntas: [
+      { pregunta: "¿Habrá un juicio?", cita: "Hechos 17:31", texto: "Por cuanto ha establecido un día en el cual juzgará al mundo con justicia, por aquel varón a quien designó.", explicacion: "Dios ha designado un día para juzgar al mundo con perfecta justicia a través de Jesucristo." },
+      { pregunta: "¿Qué será examinado en el juicio?", cita: "Eclesiastés 12:14", texto: "Porque Dios traerá toda obra a juicio, juntamente con toda cosa encubierta, sea buena o sea mala.", explicacion: "En el juicio, todas nuestras acciones serán evaluadas, incluso las secretas." },
+      { pregunta: "¿Quién es nuestro abogado?", cita: "1 Juan 2:1", texto: "Si alguno hubiere pecado, abogado tenemos para con el Padre, a Jesucristo el justo.", explicacion: "Jesús mismo es nuestro defensor en el juicio. Si aceptamos su sacrificio, Él aboga por nosotros." }
+    ]
+  },
+  {
+    id: 10, titulo: "La Santa Ley de Dios", icono: "📜",
+    intro: "Los Diez Mandamientos son la expresión del carácter de Dios y la norma de conducta para la humanidad.",
+    preguntas: [
+      { pregunta: "¿Quién escribió los Diez Mandamientos?", cita: "Éxodo 31:18", texto: "Y dio a Moisés, cuando acabó de hablar con él en el monte de Sinaí, dos tablas del testimonio, tablas de piedra escritas con el dedo de Dios.", explicacion: "Dios mismo escribió los Diez Mandamientos con su propio dedo en tablas de piedra." },
+      { pregunta: "¿La ley fue abolida por Cristo?", cita: "Mateo 5:17", texto: "No penséis que he venido para abrogar la ley o los profetas; no he venido para abrogar, sino para cumplir.", explicacion: "Jesús no vino a eliminar la ley sino a cumplirla y mostrar su verdadero significado." },
+      { pregunta: "¿Cuál es el resumen de la ley?", cita: "Mateo 22:37-40", texto: "Amarás al Señor tu Dios con todo tu corazón... y amarás a tu prójimo como a ti mismo.", explicacion: "Toda la ley se resume en amar a Dios supremamente y al prójimo como a uno mismo." }
+    ]
+  },
+  {
+    id: 11, titulo: "El Día de Descanso", icono: "🕊️",
+    intro: "Dios estableció un día especial de reposo como memorial de la creación y como tiempo de comunión con Él.",
+    preguntas: [
+      { pregunta: "¿Qué día bendijo Dios?", cita: "Génesis 2:2-3", texto: "Y acabó Dios en el día séptimo la obra que hizo; y reposó el día séptimo... Y bendijo Dios el día séptimo, y lo santificó.", explicacion: "Desde la creación, Dios apartó el séptimo día como un día especial de descanso y bendición." },
+      { pregunta: "¿Qué dice el mandamiento?", cita: "Éxodo 20:8-10", texto: "Acuérdate del día de reposo para santificarlo. Seis días trabajarás... mas el séptimo día es reposo para Jehová tu Dios.", explicacion: "El cuarto mandamiento nos pide recordar y santificar el sábado como día de reposo." },
+      { pregunta: "¿Jesús guardó el sábado?", cita: "Lucas 4:16", texto: "Vino a Nazaret, donde se había criado; y en el día de reposo entró en la sinagoga, conforme a su costumbre, y se levantó a leer.", explicacion: "Jesús guardó el sábado como su costumbre, dándonos ejemplo perfecto a seguir." }
+    ]
+  },
+  {
+    id: 12, titulo: "Cómo Guardar el Sábado", icono: "🌅",
+    intro: "El sábado es un regalo de Dios para nuestra renovación espiritual, física y relacional.",
+    preguntas: [
+      { pregunta: "¿Cuándo comienza el sábado?", cita: "Levítico 23:32", texto: "De tarde a tarde guardaréis vuestro reposo.", explicacion: "El sábado bíblico comienza el viernes a la puesta del sol y termina el sábado a la puesta del sol." },
+      { pregunta: "¿Qué debemos hacer en sábado?", cita: "Isaías 58:13-14", texto: "Si retrajeres del día de reposo tu pie, de hacer tu voluntad en mi día santo, y lo llamares delicia, santo, glorioso de Jehová... entonces te deleitarás en Jehová.", explicacion: "El sábado es un día para deleitarnos en Dios, dedicado a la adoración, la comunión y hacer el bien." },
+      { pregunta: "¿Es el sábado una carga?", cita: "Marcos 2:27", texto: "El día de reposo fue hecho por causa del hombre, y no el hombre por causa del día de reposo.", explicacion: "El sábado no es una carga sino un regalo de Dios diseñado para nuestro beneficio y gozo." }
+    ]
+  },
+  {
+    id: 13, titulo: "La Muerte", icono: "🌾",
+    intro: "La Biblia enseña la verdad acerca de lo que sucede cuando una persona muere.",
+    preguntas: [
+      { pregunta: "¿Qué sucede al morir?", cita: "Eclesiastés 9:5", texto: "Porque los que viven saben que han de morir; pero los muertos nada saben.", explicacion: "La Biblia enseña que los muertos no saben nada. La muerte es como un sueño inconsciente hasta la resurrección." },
+      { pregunta: "¿De qué fue formado el hombre?", cita: "Génesis 2:7", texto: "Entonces Jehová Dios formó al hombre del polvo de la tierra, y sopló en su nariz aliento de vida, y fue el hombre un ser viviente.", explicacion: "El ser humano fue formado del polvo + aliento de vida = ser viviente. Al morir, este proceso se revierte." },
+      { pregunta: "¿Hay esperanza después de la muerte?", cita: "Juan 11:25", texto: "Yo soy la resurrección y la vida; el que cree en mí, aunque esté muerto, vivirá.", explicacion: "Jesús es la resurrección y la vida. Los que creen en Él serán resucitados cuando Él venga." }
+    ]
+  },
+  {
+    id: 14, titulo: "La Iglesia", icono: "⛪",
+    intro: "Dios estableció su iglesia como una comunidad de creyentes unidos por la fe en Cristo.",
+    preguntas: [
+      { pregunta: "¿Quién es el fundamento de la iglesia?", cita: "1 Corintios 3:11", texto: "Porque nadie puede poner otro fundamento que el que está puesto, el cual es Jesucristo.", explicacion: "Cristo es el único fundamento de la verdadera iglesia. Toda iglesia debe estar edificada sobre Él." },
+      { pregunta: "¿Cuáles son las señales de la iglesia verdadera?", cita: "Apocalipsis 12:17", texto: "Los que guardan los mandamientos de Dios y tienen el testimonio de Jesucristo.", explicacion: "La iglesia verdadera se identifica por guardar los mandamientos de Dios y tener el testimonio de Jesús." },
+      { pregunta: "¿Por qué congregarnos?", cita: "Hebreos 10:25", texto: "No dejando de congregarnos, como algunos tienen por costumbre, sino exhortándonos.", explicacion: "Dios desea que los creyentes se reúnan para fortalecerse mutuamente y crecer en la fe." }
+    ]
+  },
+  {
+    id: 15, titulo: "El Don de Profecía", icono: "🔥",
+    intro: "Dios ha dado el don de profecía a su iglesia como guía especial para los últimos tiempos.",
+    preguntas: [
+      { pregunta: "¿Qué dones dio Dios a su iglesia?", cita: "Efesios 4:11-12", texto: "Y él mismo constituyó a unos, apóstoles; a otros, profetas; a otros, evangelistas; a otros, pastores y maestros.", explicacion: "Dios otorgó diferentes dones a la iglesia, incluyendo el don de profecía, para edificar a los creyentes." },
+      { pregunta: "¿Cómo probar un profeta verdadero?", cita: "Isaías 8:20", texto: "¡A la ley y al testimonio! Si no dijeren conforme a esto, es porque no les ha amanecido.", explicacion: "Todo profeta verdadero debe estar en armonía con la Biblia. Si contradice las Escrituras, no es de Dios." },
+      { pregunta: "¿Tendría la iglesia final este don?", cita: "Apocalipsis 19:10", texto: "El testimonio de Jesús es el espíritu de la profecía.", explicacion: "La iglesia de los últimos tiempos tendría el don profético como parte de su identidad." }
+    ]
+  },
+  {
+    id: 16, titulo: "Las Normas Cristianas", icono: "🌿",
+    intro: "Dios nos da principios de vida que promueven nuestra salud física, mental y espiritual.",
+    preguntas: [
+      { pregunta: "¿Qué dice la Biblia sobre nuestro cuerpo?", cita: "1 Corintios 6:19-20", texto: "¿O ignoráis que vuestro cuerpo es templo del Espíritu Santo...? Glorificad, pues, a Dios en vuestro cuerpo.", explicacion: "Nuestro cuerpo es templo del Espíritu Santo. Debemos cuidarlo honrando a Dios con nuestros hábitos." },
+      { pregunta: "¿Qué principio guía nuestra conducta?", cita: "1 Corintios 10:31", texto: "Si, pues, coméis o bebéis, o hacéis otra cosa, hacedlo todo para la gloria de Dios.", explicacion: "Todo lo que hacemos debe glorificar a Dios, incluyendo lo que comemos, bebemos y cómo vivimos." },
+      { pregunta: "¿Qué alimentos recomienda la Biblia?", cita: "Génesis 1:29", texto: "He aquí que os he dado toda planta que da semilla... y todo árbol en que hay fruto y que da semilla; os serán para comer.", explicacion: "La dieta original de Dios fue vegetariana. Él desea que cuidemos nuestra salud con una alimentación saludable." }
+    ]
+  },
+  {
+    id: 17, titulo: "El Bautismo", icono: "💦",
+    intro: "El bautismo es el símbolo público de nuestra decisión de seguir a Jesús, representando muerte al pecado y nueva vida.",
+    preguntas: [
+      { pregunta: "¿Qué ordenó Jesús?", cita: "Mateo 28:19", texto: "Por tanto, id, y haced discípulos a todas las naciones, bautizándolos en el nombre del Padre, y del Hijo, y del Espíritu Santo.", explicacion: "Jesús mismo ordenó el bautismo como parte esencial de hacer discípulos." },
+      { pregunta: "¿Qué representa el bautismo?", cita: "Romanos 6:4", texto: "Porque somos sepultados juntamente con él para muerte por el bautismo, a fin de que como Cristo resucitó... así también nosotros andemos en vida nueva.", explicacion: "El bautismo simboliza la muerte de nuestra vieja vida y el nacimiento a una nueva vida con Cristo." },
+      { pregunta: "¿Cómo debe ser el bautismo?", cita: "Mateo 3:16", texto: "Y Jesús, después que fue bautizado, subió luego del agua.", explicacion: "El bautismo bíblico es por inmersión, tal como fue bautizado Jesús, simbolizando sepultura y resurrección." }
+    ]
+  },
+  {
+    id: 18, titulo: "El Sostén de la Iglesia", icono: "🤝",
+    intro: "Dios estableció un plan para el sostén de su obra a través de los diezmos y las ofrendas.",
+    preguntas: [
+      { pregunta: "¿Qué es el diezmo?", cita: "Malaquías 3:10", texto: "Traed todos los diezmos al alfolí y haya alimento en mi casa; y probadme ahora en esto... si no os abriré las ventanas de los cielos.", explicacion: "El diezmo es la décima parte de nuestras ganancias que devolvemos a Dios. Él promete bendecirnos abundantemente." },
+      { pregunta: "¿A quién pertenece el diezmo?", cita: "Levítico 27:30", texto: "Y el diezmo de la tierra, así de la simiente de la tierra como del fruto de los árboles, de Jehová es; es cosa dedicada a Jehová.", explicacion: "El diezmo pertenece a Dios. Devolverlo es un acto de fidelidad y reconocimiento de que todo proviene de Él." },
+      { pregunta: "¿Cómo debemos ofrendar?", cita: "2 Corintios 9:7", texto: "Cada uno dé como propuso en su corazón: no con tristeza, ni por necesidad, porque Dios ama al dador alegre.", explicacion: "Las ofrendas deben ser voluntarias y alegres, dadas con un corazón agradecido." }
+    ]
+  },
+  {
+    id: 19, titulo: "La Vida Cristiana", icono: "🌱",
+    intro: "La vida cristiana es un caminar diario con Jesús, creciendo en gracia y en conocimiento de Él.",
+    preguntas: [
+      { pregunta: "¿Cómo crecemos espiritualmente?", cita: "2 Pedro 3:18", texto: "Antes bien, creced en la gracia y el conocimiento de nuestro Señor y Salvador Jesucristo.", explicacion: "El crecimiento espiritual es un proceso continuo de conocer más a Jesús y reflejar su carácter." },
+      { pregunta: "¿Qué frutos produce el Espíritu?", cita: "Gálatas 5:22-23", texto: "Mas el fruto del Espíritu es amor, gozo, paz, paciencia, benignidad, bondad, fe, mansedumbre, templanza.", explicacion: "Cuando el Espíritu Santo habita en nosotros, produce frutos hermosos que transforman nuestro carácter." },
+      { pregunta: "¿Cuál es nuestra misión?", cita: "Mateo 28:19-20", texto: "Por tanto, id, y haced discípulos a todas las naciones... enseñándoles que guarden todas las cosas que os he mandado.", explicacion: "Cada cristiano tiene la misión de compartir el evangelio y hacer discípulos para Cristo." }
+    ]
+  },
+  {
+    id: 20, titulo: "Dios nos Llama", icono: "📯",
+    intro: "Dios te está llamando hoy a tomar la decisión más importante de tu vida: aceptar a Jesús como tu Salvador personal.",
+    preguntas: [
+      { pregunta: "¿Qué invitación hace Jesús?", cita: "Apocalipsis 3:20", texto: "He aquí, yo estoy a la puerta y llamo; si alguno oye mi voz y abre la puerta, entraré a él, y cenaré con él, y él conmigo.", explicacion: "Jesús está tocando la puerta de tu corazón. Él no la fuerza, espera que tú le abras voluntariamente." },
+      { pregunta: "¿Cuándo debemos responder?", cita: "2 Corintios 6:2", texto: "He aquí ahora el tiempo aceptable; he aquí ahora el día de salvación.", explicacion: "El momento de decidir es ahora. No sabemos qué traerá el mañana, pero hoy podemos aceptar a Jesús." },
+      { pregunta: "¿Qué promesa tiene quien acepta a Jesús?", cita: "Juan 1:12", texto: "Mas a todos los que le recibieron, a los que creen en su nombre, les dio potestad de ser hechos hijos de Dios.", explicacion: "Al aceptar a Jesús, nos convertimos en hijos de Dios con todas las promesas y bendiciones que esto implica." }
+    ]
+  }
+];
+
+const INSTRUCTORES = [
+  "Pastor Principal", "Anciano de Iglesia", "Líder de Grupo Pequeño",
+  "Instructor Bíblico", "Diácono / Diaconisa", "Misionero Laico"
+];
+
+const DEPARTAMENTOS_CO = [
+  "Amazonas","Antioquia","Arauca","Atlántico","Bolívar","Boyacá","Caldas",
+  "Caquetá","Casanare","Cauca","Cesar","Chocó","Córdoba","Cundinamarca",
+  "Guainía","Guaviare","Huila","La Guajira","Magdalena","Meta","Nariño",
+  "Norte de Santander","Putumayo","Quindío","Risaralda",
+  "San Andrés y Providencia","Santander","Sucre","Tolima","Valle del Cauca",
+  "Vaupés","Vichada","Otro País"
+];
+
+// ─── STYLES ───
+const fonts = `
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
+`;
+
+// ─── MAIN APP ───
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [screen, setScreen] = useState("welcome"); // welcome, register, dashboard, leccion, certificado
+  const [currentLeccion, setCurrentLeccion] = useState(null);
+  const [progress, setProgress] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  // Load user & progress from storage
+  useEffect(() => {
+    (async () => {
+      try {
+        const u = await window.storage.get("user_data");
+        if (u) {
+          setUser(JSON.parse(u.value));
+          setScreen("dashboard");
+        }
+      } catch {}
+      try {
+        const p = await window.storage.get("progress_data");
+        if (p) setProgress(JSON.parse(p.value));
+      } catch {}
+      setLoading(false);
+    })();
+  }, []);
+
+  const saveUser = async (data) => {
+    setUser(data);
+    try { await window.storage.set("user_data", JSON.stringify(data)); } catch {}
+  };
+
+  const saveProgress = async (newProgress) => {
+    setProgress(newProgress);
+    try { await window.storage.set("progress_data", JSON.stringify(newProgress)); } catch {}
+  };
+
+  const completarLeccion = async (leccionId) => {
+    const np = { ...progress, [leccionId]: { completed: true, date: new Date().toISOString() } };
+    await saveProgress(np);
+    const totalCompleted = Object.keys(np).filter(k => np[k]?.completed).length;
+    if (totalCompleted === 20) {
+      setShowConfetti(true);
+      setTimeout(() => { setShowConfetti(false); setScreen("certificado"); }, 3000);
+    } else {
+      setCurrentLeccion(null);
+      setScreen("dashboard");
+    }
+  };
+
+  const completedCount = Object.keys(progress).filter(k => progress[k]?.completed).length;
+  const pct = Math.round((completedCount / 20) * 100);
+
+  const resetAll = async () => {
+    try { await window.storage.delete("user_data"); } catch {}
+    try { await window.storage.delete("progress_data"); } catch {}
+    setUser(null);
+    setProgress({});
+    setScreen("welcome");
+    setCurrentLeccion(null);
+  };
+
+  if (loading) return <LoadingScreen />;
+
+  return (
+    <div style={{ fontFamily: "'Source Sans 3', sans-serif", minHeight: "100vh", background: "linear-gradient(160deg, #0c1222 0%, #1a1a3e 40%, #2d1b4e 100%)", color: "#f0ece3" }}>
+      <style>{fonts}</style>
+      {showConfetti && <Confetti />}
+      {screen === "welcome" && <WelcomeScreen onStart={() => setScreen("register")} />}
+      {screen === "register" && <RegisterScreen onRegister={(d) => { saveUser(d); setScreen("dashboard"); }} onBack={() => setScreen("welcome")} />}
+      {screen === "dashboard" && (
+        <Dashboard
+          user={user}
+          progress={progress}
+          pct={pct}
+          completedCount={completedCount}
+          onSelectLeccion={(l) => { setCurrentLeccion(l); setScreen("leccion"); }}
+          onCertificado={() => setScreen("certificado")}
+          onReset={resetAll}
+        />
+      )}
+      {screen === "leccion" && currentLeccion && (
+        <LeccionView
+          leccion={currentLeccion}
+          onComplete={() => completarLeccion(currentLeccion.id)}
+          onBack={() => { setCurrentLeccion(null); setScreen("dashboard"); }}
+          isCompleted={!!progress[currentLeccion.id]?.completed}
+        />
+      )}
+      {screen === "certificado" && (
+        <CertificadoView user={user} onBack={() => setScreen("dashboard")} />
+      )}
+    </div>
+  );
+}
+
+// ─── LOADING ───
+function LoadingScreen() {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "linear-gradient(160deg, #0c1222, #1a1a3e, #2d1b4e)" }}>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: 48, marginBottom: 16, animation: "pulse 1.5s infinite" }}>✝️</div>
+        <p style={{ color: "#c4b5a0", fontFamily: "'Source Sans 3', sans-serif", letterSpacing: 2 }}>CARGANDO...</p>
+        <style>{`@keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .6; transform: scale(1.1); } }`}</style>
+      </div>
+    </div>
+  );
+}
+
+// ─── CONFETTI ───
+function Confetti() {
+  const colors = ["#f6c445", "#e8a838", "#d4943a", "#c4b5a0", "#fff", "#a78bfa", "#60a5fa"];
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 9999, pointerEvents: "none", overflow: "hidden" }}>
+      {Array.from({ length: 60 }).map((_, i) => (
+        <div key={i} style={{
+          position: "absolute",
+          top: -20,
+          left: `${Math.random() * 100}%`,
+          width: Math.random() * 10 + 5,
+          height: Math.random() * 10 + 5,
+          background: colors[i % colors.length],
+          borderRadius: Math.random() > 0.5 ? "50%" : "2px",
+          animation: `fall ${Math.random() * 2 + 2}s linear ${Math.random() * 1}s forwards`,
+          transform: `rotate(${Math.random() * 360}deg)`,
+        }} />
+      ))}
+      <style>{`@keyframes fall { to { top: 110vh; opacity: 0; transform: rotate(720deg) translateX(${Math.random() > 0.5 ? '' : '-'}80px); } }`}</style>
+    </div>
+  );
+}
+
+// ─── WELCOME ───
+function WelcomeScreen({ onStart }) {
+  return (
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px 16px", textAlign: "center" }}>
+      <div style={{ animation: "fadeUp .8s ease" }}>
+        <div style={{ fontSize: 14, letterSpacing: 6, color: "#c4b5a0", textTransform: "uppercase", marginBottom: 12, fontWeight: 500 }}>
+          Iglesia Adventista del Séptimo Día
+        </div>
+        <div style={{ width: 100, height: 2, background: "linear-gradient(90deg, transparent, #f6c445, transparent)", margin: "0 auto 32px" }} />
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(36px, 8vw, 64px)", fontWeight: 700, lineHeight: 1.1, margin: "0 0 8px", background: "linear-gradient(135deg, #f6c445, #e8a838, #f6c445)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          La Fe de Jesús
+        </h1>
+        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(16px, 3vw, 22px)", fontWeight: 400, fontStyle: "italic", color: "#c4b5a0", margin: "0 0 32px" }}>
+          Curso Bíblico — 20 Lecciones
+        </p>
+        <p style={{ fontSize: 16, color: "#a09882", maxWidth: 500, margin: "0 auto 40px", lineHeight: 1.7 }}>
+          Un viaje transformador a través de las verdades esenciales del cristianismo, basado en las Sagradas Escrituras.
+        </p>
+        <button onClick={onStart} style={{
+          background: "linear-gradient(135deg, #f6c445, #e8a838)",
+          color: "#1a1a3e", border: "none", padding: "16px 48px", borderRadius: 50,
+          fontSize: 16, fontWeight: 700, cursor: "pointer", letterSpacing: 1,
+          fontFamily: "'Source Sans 3', sans-serif",
+          boxShadow: "0 4px 24px rgba(246,196,69,.3)",
+          transition: "all .3s ease",
+        }}
+          onMouseOver={e => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = "0 8px 32px rgba(246,196,69,.4)"; }}
+          onMouseOut={e => { e.target.style.transform = "translateY(0)"; e.target.style.boxShadow = "0 4px 24px rgba(246,196,69,.3)"; }}
+        >
+          COMENZAR MI CURSO
+        </button>
+        <div style={{ marginTop: 48, display: "flex", gap: 32, justifyContent: "center", flexWrap: "wrap" }}>
+          {[["20", "Lecciones"], ["60+", "Versículos"], ["✓", "Certificado"]].map(([n, l]) => (
+            <div key={l} style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: "#f6c445", fontFamily: "'Playfair Display', serif" }}>{n}</div>
+              <div style={{ fontSize: 12, color: "#888", letterSpacing: 1, textTransform: "uppercase" }}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <style>{`@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+    </div>
+  );
+}
+
+// ─── REGISTER ───
+function RegisterScreen({ onRegister, onBack }) {
+  const [form, setForm] = useState({ nombre: "", email: "", telefono: "", departamento: "", ciudad: "", instructor: "", nombreInstructor: "" });
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    const e = {};
+    if (!form.nombre.trim()) e.nombre = true;
+    if (!form.email.trim() || !form.email.includes("@")) e.email = true;
+    if (!form.telefono.trim()) e.telefono = true;
+    if (!form.departamento) e.departamento = true;
+    if (!form.ciudad.trim()) e.ciudad = true;
+    if (!form.instructor) e.instructor = true;
+    if (!form.nombreInstructor.trim()) e.nombreInstructor = true;
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (validate()) onRegister({ ...form, registeredAt: new Date().toISOString() });
+  };
+
+  const inputStyle = (hasError) => ({
+    width: "100%", padding: "14px 16px", background: "rgba(255,255,255,.06)",
+    border: `1.5px solid ${hasError ? "#ef4444" : "rgba(255,255,255,.12)"}`,
+    borderRadius: 12, color: "#f0ece3", fontSize: 15,
+    fontFamily: "'Source Sans 3', sans-serif", outline: "none",
+    transition: "border .3s, background .3s", boxSizing: "border-box",
+  });
+
+  const labelStyle = { fontSize: 13, fontWeight: 600, color: "#c4b5a0", marginBottom: 6, display: "block", letterSpacing: .5 };
+
+  return (
+    <div style={{ minHeight: "100vh", padding: "24px 16px", display: "flex", justifyContent: "center", alignItems: "flex-start" }}>
+      <div style={{ maxWidth: 520, width: "100%", paddingTop: 20, animation: "fadeUp .6s ease" }}>
+        <button onClick={onBack} style={{ background: "none", border: "none", color: "#c4b5a0", cursor: "pointer", fontSize: 14, marginBottom: 24, display: "flex", alignItems: "center", gap: 6, fontFamily: "'Source Sans 3'" }}>
+          ← Volver
+        </button>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, margin: "0 0 4px", color: "#f6c445" }}>Registro de Estudiante</h2>
+        <p style={{ color: "#888", margin: "0 0 28px", fontSize: 14 }}>Completa tus datos para iniciar el curso bíblico</p>
+
+        <div style={{ background: "rgba(255,255,255,.03)", borderRadius: 20, padding: "28px 24px", border: "1px solid rgba(255,255,255,.06)" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <div>
+              <label style={labelStyle}>Nombre completo *</label>
+              <input style={inputStyle(errors.nombre)} placeholder="Tu nombre y apellido" value={form.nombre} onChange={e => setForm({ ...form, nombre: e.target.value })} onFocus={e => e.target.style.borderColor = "#f6c445"} onBlur={e => e.target.style.borderColor = errors.nombre ? "#ef4444" : "rgba(255,255,255,.12)"} />
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div>
+                <label style={labelStyle}>Correo electrónico *</label>
+                <input style={inputStyle(errors.email)} placeholder="correo@ejemplo.com" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} onFocus={e => e.target.style.borderColor = "#f6c445"} onBlur={e => e.target.style.borderColor = errors.email ? "#ef4444" : "rgba(255,255,255,.12)"} />
+              </div>
+              <div>
+                <label style={labelStyle}>WhatsApp / Teléfono *</label>
+                <input style={inputStyle(errors.telefono)} placeholder="+57 300 000 0000" value={form.telefono} onChange={e => setForm({ ...form, telefono: e.target.value })} onFocus={e => e.target.style.borderColor = "#f6c445"} onBlur={e => e.target.style.borderColor = errors.telefono ? "#ef4444" : "rgba(255,255,255,.12)"} />
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div>
+                <label style={labelStyle}>Departamento *</label>
+                <select style={{ ...inputStyle(errors.departamento), appearance: "none", cursor: "pointer" }} value={form.departamento} onChange={e => setForm({ ...form, departamento: e.target.value })} onFocus={e => e.target.style.borderColor = "#f6c445"} onBlur={e => e.target.style.borderColor = errors.departamento ? "#ef4444" : "rgba(255,255,255,.12)"}>
+                  <option value="" style={{ background: "#1a1a3e" }}>Seleccionar...</option>
+                  {DEPARTAMENTOS_CO.map(d => <option key={d} value={d} style={{ background: "#1a1a3e" }}>{d}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Ciudad *</label>
+                <input style={inputStyle(errors.ciudad)} placeholder="Tu ciudad" value={form.ciudad} onChange={e => setForm({ ...form, ciudad: e.target.value })} onFocus={e => e.target.style.borderColor = "#f6c445"} onBlur={e => e.target.style.borderColor = errors.ciudad ? "#ef4444" : "rgba(255,255,255,.12)"} />
+              </div>
+            </div>
+
+            <div style={{ borderTop: "1px solid rgba(255,255,255,.08)", paddingTop: 18, marginTop: 4 }}>
+              <p style={{ fontSize: 13, color: "#f6c445", fontWeight: 600, margin: "0 0 14px", letterSpacing: .5 }}>👤 INFORMACIÓN DEL INSTRUCTOR</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <div>
+                  <label style={labelStyle}>Rol del instructor *</label>
+                  <select style={{ ...inputStyle(errors.instructor), appearance: "none", cursor: "pointer" }} value={form.instructor} onChange={e => setForm({ ...form, instructor: e.target.value })} onFocus={e => e.target.style.borderColor = "#f6c445"} onBlur={e => e.target.style.borderColor = errors.instructor ? "#ef4444" : "rgba(255,255,255,.12)"}>
+                    <option value="" style={{ background: "#1a1a3e" }}>Seleccionar rol...</option>
+                    {INSTRUCTORES.map(i => <option key={i} value={i} style={{ background: "#1a1a3e" }}>{i}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>Nombre del instructor *</label>
+                  <input style={inputStyle(errors.nombreInstructor)} placeholder="Nombre de quien le da el curso" value={form.nombreInstructor} onChange={e => setForm({ ...form, nombreInstructor: e.target.value })} onFocus={e => e.target.style.borderColor = "#f6c445"} onBlur={e => e.target.style.borderColor = errors.nombreInstructor ? "#ef4444" : "rgba(255,255,255,.12)"} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {Object.keys(errors).length > 0 && (
+            <p style={{ color: "#ef4444", fontSize: 13, marginTop: 14, textAlign: "center" }}>
+              Por favor completa todos los campos marcados con *
+            </p>
+          )}
+
+          <button onClick={handleSubmit} style={{
+            width: "100%", marginTop: 24, padding: "16px",
+            background: "linear-gradient(135deg, #f6c445, #e8a838)",
+            color: "#1a1a3e", border: "none", borderRadius: 12,
+            fontSize: 16, fontWeight: 700, cursor: "pointer",
+            fontFamily: "'Source Sans 3', sans-serif",
+            boxShadow: "0 4px 20px rgba(246,196,69,.25)",
+            transition: "transform .2s",
+          }}
+            onMouseOver={e => e.target.style.transform = "translateY(-1px)"}
+            onMouseOut={e => e.target.style.transform = "translateY(0)"}
+          >
+            REGISTRARME Y COMENZAR
+          </button>
+        </div>
+        <style>{`@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      </div>
+    </div>
+  );
+}
+
+// ─── DASHBOARD ───
+function Dashboard({ user, progress, pct, completedCount, onSelectLeccion, onCertificado, onReset }) {
+  const allDone = completedCount === 20;
+
+  return (
+    <div style={{ minHeight: "100vh", padding: "24px 16px 60px" }}>
+      <div style={{ maxWidth: 720, margin: "0 auto", animation: "fadeUp .5s ease" }}>
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <div style={{ fontSize: 12, letterSpacing: 4, color: "#c4b5a0", textTransform: "uppercase", marginBottom: 4 }}>Curso Bíblico</div>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(24px, 5vw, 36px)", fontWeight: 700, margin: 0, color: "#f6c445" }}>La Fe de Jesús</h1>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: 14, color: "#f0ece3", fontWeight: 600 }}>{user?.nombre}</div>
+            <div style={{ fontSize: 12, color: "#888" }}>Instructor: {user?.nombreInstructor}</div>
+            <div style={{ fontSize: 11, color: "#666" }}>({user?.instructor})</div>
+          </div>
+        </div>
+
+        {/* Progress Card */}
+        <div style={{
+          background: "linear-gradient(135deg, rgba(246,196,69,.08), rgba(232,168,56,.04))",
+          borderRadius: 20, padding: "24px", marginBottom: 28,
+          border: "1px solid rgba(246,196,69,.15)",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <div>
+              <div style={{ fontSize: 13, color: "#c4b5a0", fontWeight: 500, letterSpacing: 1 }}>MI PROGRESO</div>
+              <div style={{ fontSize: 32, fontWeight: 800, color: "#f6c445", fontFamily: "'Playfair Display', serif" }}>
+                {completedCount}<span style={{ fontSize: 18, color: "#888" }}>/20</span>
+              </div>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ position: "relative", width: 72, height: 72 }}>
+                <svg width="72" height="72" viewBox="0 0 72 72" style={{ transform: "rotate(-90deg)" }}>
+                  <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="6" />
+                  <circle cx="36" cy="36" r="30" fill="none" stroke="#f6c445" strokeWidth="6"
+                    strokeDasharray={`${pct * 1.885} 188.5`}
+                    strokeLinecap="round"
+                    style={{ transition: "stroke-dasharray .8s ease" }}
+                  />
+                </svg>
+                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, color: "#f6c445" }}>
+                  {pct}%
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style={{ background: "rgba(255,255,255,.06)", borderRadius: 10, height: 8, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${pct}%`, background: "linear-gradient(90deg, #f6c445, #e8a838)", borderRadius: 10, transition: "width .8s ease" }} />
+          </div>
+          {allDone && (
+            <button onClick={onCertificado} style={{
+              width: "100%", marginTop: 16, padding: "14px",
+              background: "linear-gradient(135deg, #f6c445, #e8a838)",
+              color: "#1a1a3e", border: "none", borderRadius: 12,
+              fontSize: 15, fontWeight: 700, cursor: "pointer",
+              fontFamily: "'Source Sans 3', sans-serif",
+              boxShadow: "0 4px 20px rgba(246,196,69,.25)",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            }}>
+              🎓 VER MI CERTIFICADO DE GRADUACIÓN
+            </button>
+          )}
+        </div>
+
+        {/* Lessons Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
+          {LECCIONES.map((l, idx) => {
+            const done = !!progress[l.id]?.completed;
+            const isNext = !done && idx === completedCount;
+            return (
+              <button
+                key={l.id}
+                onClick={() => onSelectLeccion(l)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 14,
+                  padding: "16px 18px", borderRadius: 16,
+                  background: done ? "rgba(246,196,69,.08)" : isNext ? "rgba(246,196,69,.04)" : "rgba(255,255,255,.02)",
+                  border: `1.5px solid ${done ? "rgba(246,196,69,.25)" : isNext ? "rgba(246,196,69,.2)" : "rgba(255,255,255,.06)"}`,
+                  cursor: "pointer", textAlign: "left", width: "100%",
+                  transition: "all .25s ease",
+                  fontFamily: "'Source Sans 3', sans-serif",
+                  color: "#f0ece3",
+                  position: "relative", overflow: "hidden",
+                }}
+                onMouseOver={e => { e.currentTarget.style.background = done ? "rgba(246,196,69,.12)" : "rgba(255,255,255,.05)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                onMouseOut={e => { e.currentTarget.style.background = done ? "rgba(246,196,69,.08)" : isNext ? "rgba(246,196,69,.04)" : "rgba(255,255,255,.02)"; e.currentTarget.style.transform = "translateY(0)"; }}
+              >
+                {isNext && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg, #f6c445, transparent)" }} />}
+                <div style={{
+                  width: 44, height: 44, borderRadius: 12,
+                  background: done ? "linear-gradient(135deg, #f6c445, #e8a838)" : "rgba(255,255,255,.06)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: done ? 18 : 14,
+                  color: done ? "#1a1a3e" : "#888",
+                  fontWeight: 700, flexShrink: 0,
+                }}>
+                  {done ? "✓" : l.id}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 11, color: done ? "#f6c445" : "#888", fontWeight: 600, letterSpacing: 1 }}>
+                    LECCIÓN {l.id} {done && "• COMPLETADA"}
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: done ? "#f0ece3" : "#c4b5a0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {l.titulo}
+                  </div>
+                </div>
+                <div style={{ fontSize: 18, opacity: .4, flexShrink: 0 }}>{l.icono}</div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Footer */}
+        <div style={{ marginTop: 40, textAlign: "center" }}>
+          <button onClick={onReset} style={{
+            background: "none", border: "1px solid rgba(255,255,255,.1)",
+            color: "#888", padding: "10px 24px", borderRadius: 10,
+            cursor: "pointer", fontSize: 12, fontFamily: "'Source Sans 3'",
+            letterSpacing: 1, transition: "all .2s",
+          }}
+            onMouseOver={e => { e.target.style.borderColor = "#ef4444"; e.target.style.color = "#ef4444"; }}
+            onMouseOut={e => { e.target.style.borderColor = "rgba(255,255,255,.1)"; e.target.style.color = "#888"; }}
+          >
+            REINICIAR CURSO
+          </button>
+        </div>
+      </div>
+      <style>{`@keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+    </div>
+  );
+}
+
+// ─── LECCION VIEW ───
+function LeccionView({ leccion, onComplete, onBack, isCompleted }) {
+  const [step, setStep] = useState(0); // 0=intro, 1-3=preguntas, 4=resumen
+  const [revealed, setRevealed] = useState({});
+  const [allRevealed, setAllRevealed] = useState(false);
+  const totalSteps = leccion.preguntas.length + 2; // intro + preguntas + resumen
+
+  const revealAnswer = (idx) => {
+    const nr = { ...revealed, [idx]: true };
+    setRevealed(nr);
+    if (Object.keys(nr).length === leccion.preguntas.length) setAllRevealed(true);
+  };
+
+  const containerRef = useRef(null);
+  useEffect(() => { containerRef.current?.scrollTo({ top: 0, behavior: "smooth" }); }, [step]);
+
+  return (
+    <div ref={containerRef} style={{ minHeight: "100vh", padding: "24px 16px 80px", overflow: "auto" }}>
+      <div style={{ maxWidth: 640, margin: "0 auto", animation: "fadeUp .4s ease" }}>
+        {/* Back & Progress */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <button onClick={onBack} style={{ background: "none", border: "none", color: "#c4b5a0", cursor: "pointer", fontSize: 14, fontFamily: "'Source Sans 3'" }}>← Volver</button>
+          <div style={{ display: "flex", gap: 4 }}>
+            {Array.from({ length: totalSteps }).map((_, i) => (
+              <div key={i} style={{
+                width: i === step ? 24 : 8, height: 8, borderRadius: 4,
+                background: i <= step ? "#f6c445" : "rgba(255,255,255,.1)",
+                transition: "all .3s ease",
+              }} />
+            ))}
+          </div>
+        </div>
+
+        {/* Lesson Header */}
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ fontSize: 12, color: "#c4b5a0", letterSpacing: 3, fontWeight: 600, marginBottom: 4 }}>LECCIÓN {leccion.id} DE 20</div>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(22px, 5vw, 32px)", fontWeight: 700, margin: 0, color: "#f6c445", lineHeight: 1.2 }}>
+            {leccion.icono} {leccion.titulo}
+          </h2>
+        </div>
+
+        {/* INTRO STEP */}
+        {step === 0 && (
+          <div style={{ animation: "fadeUp .4s ease" }}>
+            <div style={{
+              background: "rgba(246,196,69,.06)", borderRadius: 20, padding: "32px 24px",
+              border: "1px solid rgba(246,196,69,.12)", marginBottom: 24, textAlign: "center",
+            }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>{leccion.icono}</div>
+              <p style={{ fontSize: 17, color: "#c4b5a0", lineHeight: 1.8, margin: 0, fontStyle: "italic" }}>{leccion.intro}</p>
+            </div>
+            <p style={{ fontSize: 14, color: "#888", textAlign: "center", marginBottom: 20 }}>
+              Esta lección contiene {leccion.preguntas.length} preguntas con sus versículos bíblicos. Lee cada versículo y descubre las respuestas que Dios tiene para ti.
+            </p>
+            <button onClick={() => setStep(1)} style={{
+              width: "100%", padding: "16px",
+              background: "linear-gradient(135deg, #f6c445, #e8a838)",
+              color: "#1a1a3e", border: "none", borderRadius: 14,
+              fontSize: 16, fontWeight: 700, cursor: "pointer",
+              fontFamily: "'Source Sans 3', sans-serif",
+            }}>
+              COMENZAR ESTUDIO →
+            </button>
+          </div>
+        )}
+
+        {/* QUESTION STEPS */}
+        {step >= 1 && step <= leccion.preguntas.length && (() => {
+          const qi = step - 1;
+          const q = leccion.preguntas[qi];
+          const isRevealed = !!revealed[qi];
+          return (
+            <div key={qi} style={{ animation: "fadeUp .4s ease" }}>
+              <div style={{
+                background: "rgba(255,255,255,.03)", borderRadius: 20, padding: "28px 22px",
+                border: "1px solid rgba(255,255,255,.08)", marginBottom: 20,
+              }}>
+                <div style={{ fontSize: 12, color: "#f6c445", fontWeight: 600, letterSpacing: 2, marginBottom: 12 }}>
+                  PREGUNTA {qi + 1} DE {leccion.preguntas.length}
+                </div>
+                <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, margin: "0 0 20px", color: "#f0ece3", lineHeight: 1.4 }}>
+                  {q.pregunta}
+                </h3>
+
+                {/* Verse Reference */}
+                <div style={{
+                  background: "rgba(246,196,69,.06)", borderRadius: 12, padding: "12px 16px",
+                  border: "1px solid rgba(246,196,69,.1)", marginBottom: 16,
+                  display: "flex", alignItems: "center", gap: 10,
+                }}>
+                  <span style={{ fontSize: 20 }}>📖</span>
+                  <div>
+                    <div style={{ fontSize: 11, color: "#888", letterSpacing: 1 }}>BUSCA LA RESPUESTA EN</div>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: "#f6c445" }}>{q.cita}</div>
+                  </div>
+                </div>
+
+                {/* Reveal Button / Answer */}
+                {!isRevealed ? (
+                  <button onClick={() => revealAnswer(qi)} style={{
+                    width: "100%", padding: "16px",
+                    background: "rgba(246,196,69,.08)", border: "2px dashed rgba(246,196,69,.3)",
+                    borderRadius: 14, color: "#f6c445", fontSize: 15, fontWeight: 600,
+                    cursor: "pointer", fontFamily: "'Source Sans 3', sans-serif",
+                    transition: "all .2s",
+                  }}
+                    onMouseOver={e => { e.target.style.background = "rgba(246,196,69,.12)"; e.target.style.borderColor = "rgba(246,196,69,.5)"; }}
+                    onMouseOut={e => { e.target.style.background = "rgba(246,196,69,.08)"; e.target.style.borderColor = "rgba(246,196,69,.3)"; }}
+                  >
+                    👆 TOCA PARA VER LA RESPUESTA
+                  </button>
+                ) : (
+                  <div style={{ animation: "fadeUp .4s ease" }}>
+                    {/* Bible Text */}
+                    <div style={{
+                      background: "linear-gradient(135deg, rgba(246,196,69,.1), rgba(246,196,69,.04))",
+                      borderRadius: 14, padding: "20px", marginBottom: 16,
+                      borderLeft: "4px solid #f6c445",
+                    }}>
+                      <p style={{ fontSize: 17, color: "#f0ece3", lineHeight: 1.7, margin: "0 0 8px", fontStyle: "italic", fontFamily: "'Playfair Display', serif" }}>
+                        "{q.texto}"
+                      </p>
+                      <p style={{ fontSize: 13, color: "#f6c445", fontWeight: 600, margin: 0, textAlign: "right" }}>— {q.cita}</p>
+                    </div>
+                    {/* Explanation */}
+                    <div style={{
+                      background: "rgba(255,255,255,.03)", borderRadius: 14, padding: "18px",
+                      border: "1px solid rgba(255,255,255,.06)",
+                    }}>
+                      <div style={{ fontSize: 11, color: "#c4b5a0", fontWeight: 600, letterSpacing: 1, marginBottom: 8 }}>💡 PARA ENTENDER MEJOR</div>
+                      <p style={{ fontSize: 15, color: "#a09882", lineHeight: 1.7, margin: 0 }}>{q.explicacion}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Navigation */}
+              <div style={{ display: "flex", gap: 12 }}>
+                {step > 1 && (
+                  <button onClick={() => setStep(step - 1)} style={{
+                    flex: 1, padding: "14px", background: "rgba(255,255,255,.05)",
+                    border: "1px solid rgba(255,255,255,.1)", borderRadius: 12,
+                    color: "#c4b5a0", fontSize: 14, fontWeight: 600, cursor: "pointer",
+                    fontFamily: "'Source Sans 3', sans-serif",
+                  }}>
+                    ← Anterior
+                  </button>
+                )}
+                {isRevealed && (
+                  <button onClick={() => setStep(step + 1)} style={{
+                    flex: 2, padding: "14px",
+                    background: "linear-gradient(135deg, #f6c445, #e8a838)",
+                    border: "none", borderRadius: 12, color: "#1a1a3e",
+                    fontSize: 14, fontWeight: 700, cursor: "pointer",
+                    fontFamily: "'Source Sans 3', sans-serif",
+                  }}>
+                    {step < leccion.preguntas.length ? "Siguiente Pregunta →" : "Ver Resumen →"}
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* SUMMARY STEP */}
+        {step === leccion.preguntas.length + 1 && (
+          <div style={{ animation: "fadeUp .4s ease" }}>
+            <div style={{
+              background: "linear-gradient(135deg, rgba(246,196,69,.08), rgba(246,196,69,.03))",
+              borderRadius: 20, padding: "32px 24px", textAlign: "center",
+              border: "1px solid rgba(246,196,69,.15)", marginBottom: 24,
+            }}>
+              <div style={{ fontSize: 56, marginBottom: 12 }}>🎉</div>
+              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: "#f6c445", margin: "0 0 8px" }}>
+                {isCompleted ? "Lección ya completada" : "¡Lección Estudiada!"}
+              </h3>
+              <p style={{ fontSize: 15, color: "#c4b5a0", margin: "0 0 20px", lineHeight: 1.6 }}>
+                Has estudiado todas las preguntas de la Lección {leccion.id}: <strong>{leccion.titulo}</strong>
+              </p>
+
+              {/* Recap */}
+              <div style={{ textAlign: "left", marginBottom: 20 }}>
+                {leccion.preguntas.map((q, i) => (
+                  <div key={i} style={{
+                    padding: "12px 14px", marginBottom: 8,
+                    background: "rgba(255,255,255,.03)", borderRadius: 10,
+                    borderLeft: "3px solid #f6c445",
+                  }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#f0ece3", marginBottom: 2 }}>{q.pregunta}</div>
+                    <div style={{ fontSize: 12, color: "#888" }}>{q.cita}</div>
+                  </div>
+                ))}
+              </div>
+
+              {!isCompleted ? (
+                <button onClick={onComplete} style={{
+                  width: "100%", padding: "16px",
+                  background: "linear-gradient(135deg, #f6c445, #e8a838)",
+                  color: "#1a1a3e", border: "none", borderRadius: 14,
+                  fontSize: 16, fontWeight: 700, cursor: "pointer",
+                  fontFamily: "'Source Sans 3', sans-serif",
+                  boxShadow: "0 4px 20px rgba(246,196,69,.3)",
+                }}>
+                  ✓ MARCAR COMO COMPLETADA
+                </button>
+              ) : (
+                <button onClick={onBack} style={{
+                  width: "100%", padding: "16px",
+                  background: "rgba(246,196,69,.1)", color: "#f6c445",
+                  border: "1px solid rgba(246,196,69,.2)", borderRadius: 14,
+                  fontSize: 16, fontWeight: 600, cursor: "pointer",
+                  fontFamily: "'Source Sans 3', sans-serif",
+                }}>
+                  VOLVER AL PANEL
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+      <style>{`@keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+    </div>
+  );
+}
+
+// ─── CERTIFICADO ───
+function CertificadoView({ user, onBack }) {
+  const today = new Date();
+  const dateStr = today.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" });
+
+  return (
+    <div style={{ minHeight: "100vh", padding: "24px 16px 60px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <button onClick={onBack} style={{ background: "none", border: "none", color: "#c4b5a0", cursor: "pointer", fontSize: 14, fontFamily: "'Source Sans 3'", marginBottom: 20, alignSelf: "flex-start", maxWidth: 640, width: "100%" }}>
+        ← Volver al panel
+      </button>
+
+      <div style={{
+        maxWidth: 640, width: "100%", animation: "fadeUp .6s ease",
+        background: "linear-gradient(135deg, #fefdf5 0%, #faf4e0 50%, #f5ecd0 100%)",
+        borderRadius: 20, padding: "clamp(24px, 5vw, 48px)", position: "relative",
+        border: "3px solid #d4a843", color: "#2d1b0e",
+        boxShadow: "0 20px 60px rgba(0,0,0,.4), inset 0 0 0 1px rgba(212,168,67,.3)",
+        overflow: "hidden",
+      }}>
+        {/* Decorative corners */}
+        {["top-left", "top-right", "bottom-left", "bottom-right"].map(pos => (
+          <div key={pos} style={{
+            position: "absolute",
+            [pos.includes("top") ? "top" : "bottom"]: 12,
+            [pos.includes("left") ? "left" : "right"]: 12,
+            width: 40, height: 40,
+            borderTop: pos.includes("top") ? "3px solid #d4a843" : "none",
+            borderBottom: pos.includes("bottom") ? "3px solid #d4a843" : "none",
+            borderLeft: pos.includes("left") ? "3px solid #d4a843" : "none",
+            borderRight: pos.includes("right") ? "3px solid #d4a843" : "none",
+          }} />
+        ))}
+
+        <div style={{ textAlign: "center", position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: 12, letterSpacing: 6, color: "#8b6f3a", textTransform: "uppercase", fontWeight: 600, marginBottom: 4 }}>
+            Iglesia Adventista del Séptimo Día
+          </div>
+          <div style={{ width: 80, height: 2, background: "linear-gradient(90deg, transparent, #d4a843, transparent)", margin: "8px auto 20px" }} />
+
+          <div style={{ fontSize: 14, letterSpacing: 4, color: "#a0864a", marginBottom: 8, fontWeight: 500 }}>CERTIFICADO DE</div>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(28px, 6vw, 44px)", fontWeight: 800, margin: "0 0 4px", color: "#2d1b0e", lineHeight: 1.1 }}>
+            GRADUACIÓN
+          </h1>
+          <p style={{ fontSize: 15, color: "#8b6f3a", fontStyle: "italic", margin: "0 0 28px", fontFamily: "'Playfair Display', serif" }}>
+            Curso Bíblico "La Fe de Jesús"
+          </p>
+
+          <p style={{ fontSize: 14, color: "#5a4a32", margin: "0 0 8px" }}>Se otorga el presente certificado a:</p>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(24px, 5vw, 36px)", fontWeight: 700, margin: "0 0 4px", color: "#2d1b0e", borderBottom: "2px solid #d4a843", display: "inline-block", paddingBottom: 4 }}>
+            {user?.nombre}
+          </h2>
+          <p style={{ fontSize: 14, color: "#5a4a32", margin: "16px 0 0", lineHeight: 1.7, maxWidth: 420, marginLeft: "auto", marginRight: "auto" }}>
+            Por haber completado satisfactoriamente las <strong>20 lecciones</strong> del curso bíblico "La Fe de Jesús", demostrando dedicación en el estudio de las Sagradas Escrituras.
+          </p>
+
+          <div style={{ display: "flex", justifyContent: "center", gap: "clamp(20px, 5vw, 48px)", margin: "32px 0 24px", flexWrap: "wrap" }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ width: 120, borderBottom: "1.5px solid #a0864a", marginBottom: 6, paddingBottom: 4, fontSize: 13, color: "#2d1b0e", fontWeight: 500 }}>
+                {user?.nombreInstructor}
+              </div>
+              <div style={{ fontSize: 11, color: "#8b6f3a", letterSpacing: 1 }}>{user?.instructor}</div>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ width: 120, borderBottom: "1.5px solid #a0864a", marginBottom: 6, paddingBottom: 4, fontSize: 13, color: "#2d1b0e", fontWeight: 500 }}>
+                {dateStr}
+              </div>
+              <div style={{ fontSize: 11, color: "#8b6f3a", letterSpacing: 1 }}>FECHA</div>
+            </div>
+          </div>
+
+          <div style={{ fontSize: 12, color: "#a0864a", letterSpacing: 2, marginTop: 8 }}>
+            ✦ {user?.ciudad}, {user?.departamento} ✦
+          </div>
+        </div>
+      </div>
+
+      <p style={{ color: "#888", fontSize: 13, marginTop: 20, textAlign: "center" }}>
+        "Toda la Escritura es inspirada por Dios" — 2 Timoteo 3:16
+      </p>
+      <style>{`@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+    </div>
+  );
+}
